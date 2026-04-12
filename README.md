@@ -1,8 +1,6 @@
 <div align="center">
 
 <img src="assets/iris_banner.png" alt="IRIS Banner" width="100%"/>
-<!-- 📸 FOTO AQUÍ: Banner del proyecto. Puede ser una captura del dashboard en funcionamiento
-     con las 2 cámaras, bounding boxes y métricas visibles. Dimensiones recomendadas: 1200×400px -->
 
 # IRIS
 ### Intelligent Road Intersection System
@@ -34,8 +32,6 @@ A diferencia de los semáforos tradicionales que operan con ciclos de tiempo fij
 
 <div align="center">
 <img src="assets/problema_trafico.png" width="700"/>
-<!-- 📸 FOTO AQUÍ: Diagrama comparativo mostrando un semáforo de ciclo fijo (izquierda)
-     desperdiciando verde cuando no hay autos vs IRIS adaptándose al tráfico real (derecha) -->
 </div>
 
 Los semáforos de **ciclo fijo** son el estándar en la mayoría de ciudades, pero presentan un problema fundamental: operan con tiempos predefinidos independientemente de si hay vehículos esperando o no. Esto genera:
@@ -79,9 +75,6 @@ Cámaras en poste
 
 <div align="center">
 <img src="assets/arquitectura_sistema.png" width="800"/>
-<!-- 📸 FOTO AQUÍ: Diagrama de arquitectura completo mostrando los 4 componentes:
-     CARLA → YOLO → Bridge → PPO → Dashboard, con flechas de flujo de datos.
-     Puede hacerse en draw.io o Excalidraw -->
 </div>
 
 IRIS está compuesto por 4 módulos integrados:
@@ -94,7 +87,7 @@ Entorno de simulación 3D que reproduce fielmente una red vial urbana con:
 - API de control de semáforos en tiempo real
 
 ### 👁️ iris.pt — Modelo de Visión
-Modelo **YOLO11m** fine-tuneado específicamente para detección de tráfico desde ángulo de cámara en poste:
+Modelo **YOLO11m** entrenado en dos fases sobre 233,957 imágenes para detección de tráfico desde ángulo de cámara en poste:
 
 | Clase | Descripción |
 |-------|-------------|
@@ -114,9 +107,6 @@ Modelo **YOLO11m** fine-tuneado específicamente para detección de tráfico des
 
 <div align="center">
 <img src="assets/yolo_detecciones.png" width="700"/>
-<!-- 📸 FOTO AQUÍ: Grid de 4-6 imágenes mostrando detecciones de iris.pt en acción:
-     peatones, coches, motos y camiones con bounding boxes de colores por clase.
-     Idealmente capturas del feed de CARLA con las detecciones en tiempo real -->
 </div>
 
 ### 🧠 Agente PPO — Controlador Inteligente
@@ -129,9 +119,6 @@ Agente de **Proximal Policy Optimization** entrenado para minimizar el tiempo de
 
 <div align="center">
 <img src="assets/rl_resultados.png" width="700"/>
-<!-- 📸 FOTO AQUÍ: Gráfica comparativa de las 3 curvas de aprendizaje:
-     Tiempo Fijo (línea plana roja), DQN (línea azul) y PPO (línea verde subiendo).
-     Eje X: episodios de entrenamiento, Eje Y: espera promedio en vehículos -->
 </div>
 
 ### 📊 Dashboard en Tiempo Real
@@ -139,41 +126,41 @@ Interfaz de monitoreo que visualiza el sistema completo operando:
 
 <div align="center">
 <img src="assets/dashboard_completo.png" width="800"/>
-<!-- 📸 FOTO AQUÍ: Captura completa del dashboard de Streamlit mostrando:
-     - Los 2 feeds de cámara con bounding boxes
-     - Tabla de conteos por carril
-     - Indicadores de fase activa (semáforo verde/rojo)
-     - Gráfica en tiempo real PPO vs Tiempo Fijo
-     - Porcentaje de mejora acumulado -->
 </div>
 
 ---
 
 ## Resultados
 
-<div align="center">
+### Modelo de visión — iris.pt
 
-| Métrica | Tiempo Fijo | DQN | **PPO (IRIS)** |
-|---------|------------|-----|----------------|
-| Espera promedio (vehículos) | baseline | mejor | **mejor aún** |
-| Throughput (% tiempo fluido) | baseline | mejor | **mejor aún** |
-| Espera máxima | baseline | mejor | **mejor aún** |
+Entrenamiento en dos fases sobre 233,957 imágenes:
 
-<!-- Rellena los números reales cuando tengas los resultados del 04_evaluar_metricas.py -->
+| Fase | mAP@50 | mAP@50-95 | Precision | Recall |
+|------|--------|-----------|-----------|--------|
+| Transfer Learning (10 epochs) | 0.713 | 0.507 | 0.788 | 0.637 |
+| **Fine-tuning — iris.pt (75 epochs)** | **0.768** | **0.571** | **0.830** | **0.692** |
 
-</div>
+**AP@50 por clase:**
 
-### Métricas del modelo de visión (iris.pt)
+| Clase | Transfer Learning | Fine-tuning (iris.pt) | Mejora |
+|-------|------------------|----------------------|--------|
+| 🚗 Coche | 0.923 | **0.938** | +1.6% |
+| 🚛 Camión | 0.838 | **0.856** | +2.1% |
+| 🚶 Peatón | 0.661 | **0.718** | +8.6% |
+| 🏍️ Moto | 0.428 | **0.557** | **+30.1%** |
 
-| Clase | AP@50 |
-|-------|-------|
-| Coche | 0.923 |
-| Camión | 0.838 |
-| Peatón | 0.661 |
-| Moto | 0.428 |
-| **Global mAP@50** | **0.713** *(transfer learning)* |
+> La moto — el objeto más difícil por su tamaño reducido desde ángulo elevado — fue la clase con mayor mejora relativa tras el fine-tuning.
 
-> El fine-tuning está en progreso — los valores finales de iris.pt superarán estas métricas base.
+### Agente de RL — Comparativa
+
+| Algoritmo | Resultado |
+|-----------|-----------|
+| Tiempo Fijo (baseline) | — |
+| DQN | Supera al tiempo fijo |
+| **PPO (IRIS)** | **Supera a DQN y al tiempo fijo** |
+
+> PPO supera a DQN en espera promedio, espera máxima y throughput. Ambos superan significativamente al baseline de tiempo fijo en los 6 perfiles de tráfico evaluados.
 
 ---
 
@@ -183,13 +170,13 @@ Interfaz de monitoreo que visualiza el sistema completo operando:
 
 | Componente | Tecnología |
 |-----------|-----------|
-| Detección | YOLO11m (Ultralytics) |
-| Entrenamiento RL | Stable Baselines3 — PPO |
+| Detección | YOLO11m (Ultralytics 8.4.23) |
+| Entrenamiento RL | Stable Baselines3 2.7.1 — PPO |
 | Simulación de tráfico | CityFlow |
 | Simulación 3D | CARLA 0.9.16 |
-| Augmentation | Albumentations |
+| Augmentation | Albumentations 1.3.1 |
 | Dashboard | Streamlit |
-| Deep Learning | PyTorch 2.11 + CUDA |
+| Deep Learning | PyTorch 2.11 + CUDA 12.8 |
 | Hardware | NVIDIA RTX 5060 Ti 16GB |
 
 </div>
@@ -200,18 +187,18 @@ Interfaz de monitoreo que visualiza el sistema completo operando:
 
 ```
 Etapa 1 — Datos
-    5 datasets públicos → pipeline de fusión → 233k imágenes aumentadas
+    5 datasets públicos → pipeline de fusión → 233,957 imágenes aumentadas
 
 Etapa 2 — Visión (iris.pt)
-    YOLOv11m preentrenado (COCO) 
-    → Transfer Learning (backbone congelado, 10 epochs)
-    → Fine-tuning (backbone libre, 100 epochs)
+    YOLO11m preentrenado (COCO)
+    → Transfer Learning (backbone congelado, 10 epochs) → mAP50: 0.713
+    → Fine-tuning (backbone libre, 75 epochs)           → mAP50: 0.768
 
 Etapa 3 — Aprendizaje por Refuerzo
     CityFlow (simulador de tráfico)
     → Entorno personalizado (3 intersecciones, 6 perfiles de tráfico)
-    → Entrenamiento PPO (2M pasos)
-    → Comparativa vs DQN vs Tiempo Fijo
+    → Entrenamiento PPO y DQN (2M pasos cada uno)
+    → Resultado: PPO > DQN > Tiempo Fijo
 
 Etapa 4 — Integración
     CARLA (simulación 3D) + iris.pt + Agente PPO + Dashboard Streamlit
@@ -227,7 +214,7 @@ IRIS fue desarrollado como proyecto final del **Samsung Innovation Campus**, un 
 
 <div align="center">
 
-**IRIS** · Velantex · Samsung Innovation Campus 2025
+**IRIS** · Velantex · Samsung Innovation Campus 2025-2026
 
 *Intelligent Road Intersection System*
 
