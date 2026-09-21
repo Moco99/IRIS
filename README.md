@@ -214,7 +214,7 @@ IRIS fue desarrollado como proyecto final del **Samsung Innovation Campus**, un 
 
 <div align="center">
 
-**IRIS** · Velantex · Samsung Innovation Campus 2025-2026
+**IRIS** · Ninety9 · Samsung Innovation Campus 2025-2026
 
 *Intelligent Road Intersection System*
 
